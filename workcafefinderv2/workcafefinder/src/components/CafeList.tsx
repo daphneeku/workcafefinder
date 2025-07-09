@@ -1,6 +1,5 @@
 import React from "react";
 import type { CafeNomadCafe } from "../utils/cafenomad";
-import { useJsApiLoader } from "@react-google-maps/api";
 import BookmarkButton from "./BookmarkButton";
 
 interface CafeListProps {

@@ -10,6 +10,9 @@ import BookmarksList from "../components/BookmarksList";
 import UserDropdown from "../components/UserDropdown";
 import { supabase } from "../utils/supabase";
 import type { User } from '@supabase/supabase-js';
+import type { Bookmark } from '../utils/supabase';
+
+type MinimalUser = { id: string; email: string; user_metadata?: { name?: string } };
 
 const taipei = { lat: 25.033964, lng: 121.564468 };
 
@@ -26,7 +29,7 @@ export default function Home() {
   const [goodQuietOnly, setGoodQuietOnly] = useState(false);
   const [searchLocation, setSearchLocation] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<MinimalUser | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarksChanged, setBookmarksChanged] = useState(0);
@@ -56,16 +59,18 @@ export default function Home() {
   useEffect(() => {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
+      const user = session?.user;
+      setUser(user ? { id: user.id, email: user.email ?? '', user_metadata: user.user_metadata } : null);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+      const user = session?.user;
+      setUser(user ? { id: user.id, email: user.email ?? '', user_metadata: user.user_metadata } : null);
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -111,8 +116,41 @@ export default function Home() {
     }
   };
 
-  const handleCafeClick = (cafe: CafeNomadCafe) => {
-    setSelectedCafe(cafe);
+  const handleCafeClick = (cafe: CafeNomadCafe | Bookmark) => {
+    let normalizedCafe: CafeNomadCafe;
+    if ('cafe_id' in cafe) {
+      // Convert Bookmark to CafeNomadCafe
+      const { latitude, longitude, wifi, quiet, seat, socket, cheap, open_time, music, limited_time, standing_desk, mrt, url, city, district, price, tasty, comfort, drinks, food, last_update } = cafe as Partial<CafeNomadCafe>;
+      normalizedCafe = {
+        id: cafe.cafe_id,
+        name: cafe.cafe_name,
+        address: cafe.cafe_address,
+        latitude: latitude ?? 0,
+        longitude: longitude ?? 0,
+        wifi: wifi ?? 0,
+        quiet: quiet ?? 0,
+        seat: seat ?? 0,
+        socket: socket ?? 0,
+        cheap: cheap ?? 0,
+        open_time: open_time ?? '',
+        music: music ?? 0,
+        limited_time: limited_time ?? 'no',
+        standing_desk: standing_desk ?? 'no',
+        mrt: mrt ?? '',
+        url: url ?? '',
+        city: city ?? '',
+        district: district ?? '',
+        price: price ?? '',
+        tasty: tasty ?? 0,
+        comfort: comfort ?? 0,
+        drinks: drinks ?? '',
+        food: food ?? '',
+        last_update: last_update ?? ''
+      };
+    } else {
+      normalizedCafe = cafe;
+    }
+    setSelectedCafe(normalizedCafe);
     setGoogleOpeningHours(null);
     setGoogleOpeningHoursLoading(false);
     if (window.google && window.google.maps && window.google.maps.places) {
@@ -120,12 +158,12 @@ export default function Home() {
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
       // Use textSearch for better matching
       service.textSearch({
-        query: `${cafe.name} ${cafe.address}`,
+        query: `${normalizedCafe.name} ${normalizedCafe.address}`,
       }, (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
           const placeId = results[0].place_id ?? '';
           // Step 2: Get details
-          (service.getDetails as any)({
+          service.getDetails({
             placeId,
             fields: ['opening_hours'],
           }, (place: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
@@ -580,7 +618,7 @@ export default function Home() {
       {showAuth && (
         <Auth
           onAuthChange={(user) => {
-            setUser(user)
+            setUser(user ? { id: user.id, email: user.email ?? '', user_metadata: user.user_metadata } : null)
             setShowAuth(false)
           }}
           onClose={() => setShowAuth(false)}

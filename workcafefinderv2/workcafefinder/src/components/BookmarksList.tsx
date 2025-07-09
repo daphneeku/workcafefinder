@@ -11,7 +11,33 @@ interface BookmarksListProps {
   onBookmarksChanged?: () => void;
 }
 
-type Bookmark = Partial<CafeNomadCafe> & { cafe_name: string; cafe_address: string; cafe_id: string };
+type Bookmark = {
+  cafe_id: string;
+  cafe_name: string;
+  cafe_address: string;
+  id: string;
+  latitude?: number;
+  longitude?: number;
+  wifi?: number;
+  quiet?: number;
+  seat?: number;
+  socket?: number;
+  cheap?: number;
+  open_time?: string;
+  music?: number;
+  limited_time?: string;
+  standing_desk?: string;
+  mrt?: string;
+  url?: string;
+  city?: string;
+  district?: string;
+  price?: string;
+  tasty?: number;
+  comfort?: number;
+  drinks?: string;
+  food?: string;
+  last_update?: string;
+};
 
 // Reuse CafeListItem logic for bookmarks
 const CafeListItem: React.FC<{

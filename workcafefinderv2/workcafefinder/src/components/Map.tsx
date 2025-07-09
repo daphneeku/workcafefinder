@@ -1,8 +1,8 @@
 'use client';
 import React from "react";
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
 import type { CafeNomadCafe } from "../utils/cafenomad";
-import CafeList, { CafeCardPreview } from "./CafeList";
+import { CafeCardPreview } from "./CafeList";
 
 const containerStyle = { width: "100%", height: "100%" };
 

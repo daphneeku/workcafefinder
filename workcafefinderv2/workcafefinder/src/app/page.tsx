@@ -55,7 +55,10 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Update auth logic to handle null supabase client
   useEffect(() => {
+    if (!supabase) return; // Skip if supabase client is not available
+    
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       const user = session?.user;
@@ -185,9 +188,12 @@ export default function Home() {
     setSelectedCafe(null);
   };
 
+  // Update handleLogout to handle null supabase client
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    setUser(null);
   }
 
   // Filter cafes within 1km of the current location

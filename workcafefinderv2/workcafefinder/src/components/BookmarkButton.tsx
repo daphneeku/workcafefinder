@@ -10,14 +10,17 @@ interface BookmarkButtonProps {
   bookmarksChanged?: number // Add this to trigger re-checks
 }
 
+// Update BookmarkButton component to handle null supabase client
 const BookmarkButton: React.FC<BookmarkButtonProps> = ({ cafe, userId, onBookmarksChanged, bookmarksChanged }) => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Memoized check function to prevent unnecessary re-renders
   const checkBookmarkStatus = useCallback(async () => {
-    if (!userId) return
-    
+    if (!supabase || !userId) {
+      setIsBookmarked(false)
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('bookmarks')
@@ -26,16 +29,15 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ cafe, userId, onBookmar
         .eq('cafe_id', cafe.id)
         .single()
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+      if (error && error.code !== 'PGRST116') {
         console.error('Error checking bookmark status:', error)
-        return
       }
-
       setIsBookmarked(!!data)
     } catch (err) {
       console.error('Unexpected error checking bookmark status:', err)
+      setIsBookmarked(false)
     }
-  }, [userId, cafe.id])
+  }, [userId, cafe.id, bookmarksChanged])
 
   useEffect(() => {
     if (userId) {
@@ -46,17 +48,18 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ cafe, userId, onBookmar
   }, [userId, cafe.id, bookmarksChanged, checkBookmarkStatus])
 
   const toggleBookmark = async (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent event from bubbling up to parent elements
-    if (!userId || loading) return
+    e.stopPropagation()
+    if (!supabase || !userId) {
+      alert('Please sign in to bookmark cafes')
+      return
+    }
 
     setLoading(true)
-    
-    // Optimistic update for better UX
     const previousState = isBookmarked
     setIsBookmarked(!isBookmarked)
 
     try {
-      if (previousState) {
+      if (isBookmarked) {
         // Remove bookmark
         const { error } = await supabase
           .from('bookmarks')
@@ -67,29 +70,45 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ cafe, userId, onBookmar
         if (error) {
           console.error('Error removing bookmark:', error)
           setIsBookmarked(true) // Revert optimistic update
-          return
         }
       } else {
         // Add bookmark with more complete data
         const { error } = await supabase
           .from('bookmarks')
-          .upsert({
+          .insert({
             user_id: userId,
             cafe_id: cafe.id,
             cafe_name: cafe.name,
-            cafe_address: cafe.address
-          }, {
-            onConflict: 'user_id,cafe_id'
+            cafe_address: cafe.address,
+            latitude: cafe.latitude,
+            longitude: cafe.longitude,
+            wifi: cafe.wifi,
+            quiet: cafe.quiet,
+            seat: cafe.seat,
+            socket: cafe.socket,
+            cheap: cafe.cheap,
+            open_time: cafe.open_time,
+            music: cafe.music,
+            limited_time: cafe.limited_time,
+            standing_desk: cafe.standing_desk,
+            mrt: cafe.mrt,
+            url: cafe.url,
+            city: cafe.city,
+            district: cafe.district,
+            price: cafe.price,
+            tasty: cafe.tasty,
+            comfort: cafe.comfort,
+            drinks: cafe.drinks,
+            food: cafe.food,
+            last_update: cafe.last_update
           })
 
         if (error) {
           console.error('Error adding bookmark:', error)
           setIsBookmarked(false) // Revert optimistic update
-          return
         }
       }
 
-      // Notify parent component immediately
       if (typeof onBookmarksChanged === 'function') {
         onBookmarksChanged()
       }

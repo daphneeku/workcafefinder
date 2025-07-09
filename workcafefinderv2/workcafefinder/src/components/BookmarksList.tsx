@@ -205,6 +205,7 @@ const CafeListItem: React.FC<{
   );
 };
 
+// Update BookmarksList component to handle null supabase client
 const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onClose, bookmarksChanged, onBookmarksChanged }) => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,6 +214,12 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
 
   useEffect(() => {
     const fetchBookmarks = async () => {
+      if (!supabase) {
+        setError('Database service not available');
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
       // Small delay to ensure database updates complete
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -224,18 +231,23 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
       if (error) {
         setError(error.message);
       } else {
-        // Filter out duplicates by cafe_id to ensure each cafe only appears once
-        const uniqueBookmarks = data ? data.filter((bookmark, index, self) => 
+        const uniqueBookmarks = data ? data.filter((bookmark, index, self) =>
           index === self.findIndex(b => b.cafe_id === bookmark.cafe_id)
         ) : [];
         setBookmarks(uniqueBookmarks);
       }
       setLoading(false);
     };
+
     fetchBookmarks();
   }, [userId, bookmarksChanged]);
 
   const clearAllBookmarks = async () => {
+    if (!supabase) {
+      setError('Database service not available');
+      return;
+    }
+    
     if (!confirm('Are you sure you want to remove all bookmarks? This action cannot be undone.')) {
       return;
     }
@@ -258,7 +270,7 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
       }
     } catch (err) {
       console.error('Unexpected error clearing bookmarks:', err);
-      setError('An unexpected error occurred');
+      setError('Failed to clear bookmarks');
     } finally {
       setClearing(false);
     }

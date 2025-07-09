@@ -33,9 +33,18 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
     };
   }, []);
 
+  // Update UserDropdown component to handle null supabase client
   const handleUpdateName = async () => {
-    if (!newName.trim()) return;
+    if (!supabase) {
+      alert('Authentication service not available');
+      return;
+    }
     
+    if (!newName.trim()) {
+      alert('Please enter a name');
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -43,22 +52,29 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
       });
 
       if (error) {
-        console.error('Error updating name:', error);
-        alert('Failed to update name. Please try again.');
+        alert('Failed to update name: ' + error.message);
       } else {
+        alert('Name updated successfully!');
         setIsEditing(false);
-        // Refresh the page to update the user data
-        window.location.reload();
+        setNewName('');
+        // Refresh user data
+        if (onLogout) {
+          onLogout();
+        }
       }
     } catch (err) {
-      console.error('Unexpected error updating name:', err);
-      alert('An unexpected error occurred. Please try again.');
+      alert('An unexpected error occurred');
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleDeleteAccount = async () => {
+    if (!supabase) {
+      alert('Authentication service not available');
+      return;
+    }
+    
     if (!confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your bookmarks.')) {
       return;
     }
@@ -77,16 +93,17 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
 
       // Then delete the user account
       const { error } = await supabase.auth.admin.deleteUser(user.id);
-
+      
       if (error) {
-        console.error('Error deleting account:', error);
-        alert('Failed to delete account. Please try again.');
+        alert('Failed to delete account: ' + error.message);
       } else {
-        onLogout();
+        alert('Account deleted successfully');
+        if (onLogout) {
+          onLogout();
+        }
       }
-    } catch (err) {
-      console.error('Unexpected error deleting account:', err);
-      alert('An unexpected error occurred. Please try again.');
+    } catch {
+      alert('An unexpected error occurred while deleting your account');
     } finally {
       setIsDeleting(false);
     }

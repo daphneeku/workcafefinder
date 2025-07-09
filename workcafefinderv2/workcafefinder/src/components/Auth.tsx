@@ -16,6 +16,11 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) {
+      setMessage('Authentication service not available');
+      return;
+    }
+    
     setLoading(true)
     setMessage('')
 
@@ -36,9 +41,6 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
           password,
         })
         if (error) throw error
-        // After signInWithPassword, if error is null, call onAuthChange with the user object from supabase.auth.getUser().
-        // If error is not null, do not call onAuthChange.
-        // Remove onAuthChange(error.user) and replace with correct logic.
         const { data: user } = await supabase.auth.getUser()
         if (user) {
           onAuthChange(user.user)
@@ -56,6 +58,11 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
   }
 
   const handleOAuth = async (provider: 'google' | 'facebook') => {
+    if (!supabase) {
+      setMessage('Authentication service not available');
+      return;
+    }
+    
     setLoading(true)
     setMessage('')
     try {

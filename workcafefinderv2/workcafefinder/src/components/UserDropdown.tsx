@@ -62,7 +62,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
           onLogout();
         }
       }
-    } catch (err) {
+    } catch {
       alert('An unexpected error occurred');
     } finally {
       setIsUpdating(false);

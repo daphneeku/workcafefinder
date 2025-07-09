@@ -9,6 +9,7 @@ import BookmarkButton from "../components/BookmarkButton";
 import BookmarksList from "../components/BookmarksList";
 import UserDropdown from "../components/UserDropdown";
 import { supabase } from "../utils/supabase";
+import type { User } from '@supabase/supabase-js';
 
 const taipei = { lat: 25.033964, lng: 121.564468 };
 
@@ -25,9 +26,9 @@ export default function Home() {
   const [goodQuietOnly, setGoodQuietOnly] = useState(false);
   const [searchLocation, setSearchLocation] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
-  const [user, setUser] = useState<any>(null)
-  const [showAuth, setShowAuth] = useState(false)
-  const [showBookmarks, setShowBookmarks] = useState(false)
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarksChanged, setBookmarksChanged] = useState(0);
   const [priceFilters, setPriceFilters] = useState<number[]>([]);
   const [locationHover, setLocationHover] = useState(false);

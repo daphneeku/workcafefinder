@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { supabase } from '../utils/supabase'
 
 interface AuthProps {
-  onAuthChange: (user: any) => void
+  onAuthChange: (user: unknown) => void
   onClose: () => void
 }
 
@@ -21,7 +21,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -31,15 +31,25 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
         if (error) throw error
         setMessage('Check your email for the confirmation link!')
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
         if (error) throw error
-        onAuthChange(data.user)
+        // After signInWithPassword, if error is null, call onAuthChange with the user object from supabase.auth.getUser().
+        // If error is not null, do not call onAuthChange.
+        // Remove onAuthChange(error.user) and replace with correct logic.
+        const { data: user } = await supabase.auth.getUser()
+        if (user) {
+          onAuthChange(user.user)
+        }
       }
-    } catch (error: any) {
-      setMessage(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage(error.message)
+      } else {
+        setMessage('An unexpected error occurred.')
+      }
     } finally {
       setLoading(false)
     }
@@ -51,8 +61,12 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({ provider })
       if (error) throw error
-    } catch (error: any) {
-      setMessage(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage(error.message)
+      } else {
+        setMessage('An unexpected error occurred.')
+      }
     } finally {
       setLoading(false)
     }

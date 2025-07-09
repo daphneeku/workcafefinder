@@ -5,15 +5,17 @@ import BookmarkButton from './BookmarkButton';
 
 interface BookmarksListProps {
   userId: string;
-  onCafeClick: (cafe: any) => void;
+  onCafeClick: (cafe: CafeNomadCafe | Bookmark) => void;
   onClose: () => void;
   bookmarksChanged: number;
   onBookmarksChanged?: () => void;
 }
 
+type Bookmark = Partial<CafeNomadCafe> & { cafe_name: string; cafe_address: string; cafe_id: string };
+
 // Reuse CafeListItem logic for bookmarks
 const CafeListItem: React.FC<{
-  cafe: Partial<CafeNomadCafe> & { cafe_name: string; cafe_address: string; cafe_id: string };
+  cafe: Bookmark;
   onClick: () => void;
   userId: string;
   onBookmarksChanged?: () => void;
@@ -178,7 +180,7 @@ const CafeListItem: React.FC<{
 };
 
 const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onClose, bookmarksChanged, onBookmarksChanged }) => {
-  const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
@@ -276,16 +278,16 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
                 <CafeListItem key={bm.id} cafe={bm} onClick={() => {
                   // Convert bookmarked cafe data to proper format for details modal
                   const cafeData: CafeNomadCafe = {
-                    id: bm.cafe_id,
+                    id: bm.cafe_id || '',
                     name: bm.cafe_name,
                     address: bm.cafe_address,
-                    latitude: bm.latitude,
-                    longitude: bm.longitude,
-                    wifi: bm.wifi,
-                    quiet: bm.quiet,
-                    socket: bm.socket,
-                    seat: bm.seat,
-                    cheap: bm.cheap,
+                    latitude: bm.latitude || 0,
+                    longitude: bm.longitude || 0,
+                    wifi: bm.wifi || 0,
+                    quiet: bm.quiet || 0,
+                    socket: bm.socket || 0,
+                    seat: bm.seat || 0,
+                    cheap: bm.cheap || 0,
                     open_time: bm.open_time || '',
                     music: bm.music || 0,
                     limited_time: bm.limited_time || 'no',

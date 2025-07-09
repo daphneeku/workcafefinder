@@ -1,0 +1,15 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+export interface Bookmark {
+  id: string
+  user_id: string
+  cafe_id: string
+  cafe_name: string
+  cafe_address: string
+  created_at: string
+} 

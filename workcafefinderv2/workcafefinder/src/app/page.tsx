@@ -34,6 +34,9 @@ export default function Home() {
   const [priceFilters, setPriceFilters] = useState<number[]>([]);
   const [locationHover, setLocationHover] = useState(false);
   const [bookmarksHover, setBookmarksHover] = useState(false);
+  const [cafePhoto, setCafePhoto] = React.useState<string | null>(null);
+  const [cafePhotoLoading, setCafePhotoLoading] = React.useState(false);
+  const [cafePhotoError, setCafePhotoError] = React.useState<string | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -193,12 +196,37 @@ export default function Home() {
     setBookmarksChanged((c) => c + 1);
   }, []);
 
+  useEffect(() => {
+    if (!selectedCafe) return;
+    setCafePhoto(null);
+    setCafePhotoError(null);
+    if (window.google && window.google.maps && window.google.maps.places) {
+      setCafePhotoLoading(true);
+      const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+      service.textSearch({
+        query: `${selectedCafe.name} ${selectedCafe.address}`,
+      }, (results, status) => {
+        setCafePhotoLoading(false);
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
+          if (results[0].photos && results[0].photos.length > 0) {
+            const photoUrl = results[0].photos[0].getUrl({ maxWidth: 400, maxHeight: 250 });
+            setCafePhoto(photoUrl);
+          }
+        } else {
+          setCafePhotoError('No photo available');
+        }
+      });
+    } else {
+      setCafePhotoError('No photo available');
+    }
+  }, [selectedCafe]);
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Debug info removed */}
       <header style={{ padding: "1rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1 style={{ color: '#000' }}>WorkCafeFinder Taiwan</h1>
+          <h1 style={{ color: '#000' }}>WorkCafeFinder Taiwan 🍵</h1>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             {user ? (
               <UserDropdown user={user} onLogout={handleLogout} />
@@ -328,7 +356,7 @@ export default function Home() {
         </form>
       </header>
       <main style={{ display: "flex", flex: 1, minHeight: 0, height: '82vh', gap: '1rem' }}>
-        <aside style={{ width: '20%', height: '84.8vh', overflowY: 'auto', padding: "1rem 1rem 1rem 2rem", background: '#f7f7f7', color: '#222', borderTopRightRadius: '18px' }}>
+        <aside style={{ width: '20%', height: '84.7vh', overflowY: 'auto', padding: "1rem 1rem 1rem 2rem", background: '#f7f7f7', color: '#222', borderTopRightRadius: '18px' }}>
           <h2 style={{ padding: "0.5rem 0 0.1rem 0.1rem", margin: "0 0 1.8rem 0" }}>Filters</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontWeight: 500 }}>
             <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.75rem', paddingLeft: '0.1rem' }}>
@@ -414,7 +442,7 @@ export default function Home() {
             <Map location={location} cafes={filteredCafes} isLoaded={isLoaded} loadError={loadError} onCafePinClick={handleCafeClick} />
           </div>
         </section>
-        <aside style={{ width: '25%', height: '84.8vh', overflowY: 'auto', padding: "1rem", background: '#f7f7f7', color: '#222', borderTopLeftRadius: '18px' }}>
+        <aside style={{ width: '25%', height: '84.7vh', overflowY: 'auto', padding: "1rem", background: '#f7f7f7', color: '#222', borderTopLeftRadius: '18px' }}>
           <h2 style={{ padding: "0.5rem 0 0.1rem 0.5frem", margin: "0 0 1.3rem 0" }}>Cafes</h2>
           {loading && <div>Loading cafes...</div>}
           {error && <div style={{ color: "red" }}>{error}</div>}
@@ -439,8 +467,8 @@ export default function Home() {
               background: "#fff",
               padding: 32,
               borderRadius: 16,
-              width: 520,
-              height: 570,
+              width: 600,
+              height: 800,
               display: 'flex',
               flexDirection: 'column',
               gap: 18,
@@ -454,6 +482,13 @@ export default function Home() {
             <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: '8px', zIndex: 2 }}>
               <button style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#888' }} onClick={handleCloseModal}>×</button>
             </div>
+            {cafePhotoLoading ? (
+              <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading photo...</div>
+            ) : cafePhoto ? (
+              <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
+                <img src={cafePhoto} alt={`Photo of ${selectedCafe.name}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ) : null}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
               {selectedCafe.name}
               <span onClick={e => e.stopPropagation()}>

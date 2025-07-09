@@ -263,29 +263,6 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#888' }}>×</button>
         <h2 style={{ margin: '0 0 1.5rem 0', textAlign: 'center' }}>Bookmarked Cafes</h2>
         
-        {/* Clear All Button */}
-        {!loading && !error && bookmarks.length > 0 && (
-          <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-            <button
-              onClick={clearAllBookmarks}
-              disabled={clearing}
-              style={{
-                padding: '0.5rem 1rem',
-                background: clearing ? '#ff6b6b' : '#ff4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: clearing ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                transition: 'background 0.2s',
-                opacity: clearing ? 0.7 : 1
-              }}
-            >
-              {clearing ? 'Clearing...' : 'Clear All Bookmarks'}
-            </button>
-          </div>
-        )}
-
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
@@ -293,40 +270,63 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
         ) : bookmarks.length === 0 ? (
           <div>No bookmarks yet.</div>
         ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {bookmarks.map((bm) => (
-              <CafeListItem key={bm.id} cafe={bm} onClick={() => {
-                // Convert bookmarked cafe data to proper format for details modal
-                const cafeData: CafeNomadCafe = {
-                  id: bm.cafe_id,
-                  name: bm.cafe_name,
-                  address: bm.cafe_address,
-                  latitude: bm.latitude,
-                  longitude: bm.longitude,
-                  wifi: bm.wifi,
-                  quiet: bm.quiet,
-                  socket: bm.socket,
-                  seat: bm.seat,
-                  cheap: bm.cheap,
-                  open_time: bm.open_time || '',
-                  music: bm.music || 0,
-                  limited_time: bm.limited_time || 'no',
-                  standing_desk: bm.standing_desk || 'no',
-                  mrt: bm.mrt || '',
-                  url: bm.url || '',
-                  city: bm.city || '',
-                  district: bm.district || '',
-                  price: bm.price || '',
-                  tasty: bm.tasty || 0,
-                  comfort: bm.comfort || 0,
-                  drinks: bm.drinks || '',
-                  food: bm.food || '',
-                  last_update: bm.last_update || ''
-                };
-                onCafeClick(cafeData);
-              }} userId={userId} onBookmarksChanged={onBookmarksChanged} />
-            ))}
-          </ul>
+          <>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {bookmarks.map((bm) => (
+                <CafeListItem key={bm.id} cafe={bm} onClick={() => {
+                  // Convert bookmarked cafe data to proper format for details modal
+                  const cafeData: CafeNomadCafe = {
+                    id: bm.cafe_id,
+                    name: bm.cafe_name,
+                    address: bm.cafe_address,
+                    latitude: bm.latitude,
+                    longitude: bm.longitude,
+                    wifi: bm.wifi,
+                    quiet: bm.quiet,
+                    socket: bm.socket,
+                    seat: bm.seat,
+                    cheap: bm.cheap,
+                    open_time: bm.open_time || '',
+                    music: bm.music || 0,
+                    limited_time: bm.limited_time || 'no',
+                    standing_desk: bm.standing_desk || 'no',
+                    mrt: bm.mrt || '',
+                    url: bm.url || '',
+                    city: bm.city || '',
+                    district: bm.district || '',
+                    price: bm.price || '',
+                    tasty: bm.tasty || 0,
+                    comfort: bm.comfort || 0,
+                    drinks: bm.drinks || '',
+                    food: bm.food || '',
+                    last_update: bm.last_update || ''
+                  };
+                  onCafeClick(cafeData);
+                }} userId={userId} onBookmarksChanged={onBookmarksChanged} />
+              ))}
+            </ul>
+            {/* Clear All Button moved below */}
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <button
+                onClick={clearAllBookmarks}
+                disabled={clearing}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: clearing ? '#333' : '#333',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: clearing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  transition: 'background 0.2s',
+                  opacity: clearing ? 0.7 : 1,
+                  fontWeight: 'bold'
+                }}
+              >
+                {clearing ? 'Clearing...' : 'Clear All Bookmarks'}
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -89,7 +89,7 @@ export const CafeCardPreview: React.FC<{
       style={{
         marginBottom: "1rem",
         padding: compact ? "0.3rem 0.2rem" : "1.5rem 1.5rem",
-        background: selected ? "#e0f7fa" : "#ffffff",
+        background: selected ? "rgba(101, 181, 164, 0.18)" : "#ffffff",
         border: noBorder ? "none" : "2px solid #eee",
         cursor: onClick ? "pointer" : undefined,
         color: '#3d3d3d',

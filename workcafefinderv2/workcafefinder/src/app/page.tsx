@@ -18,7 +18,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number }>(taipei);
   const [selectedCafe, setSelectedCafe] = useState<CafeNomadCafe | null>(null);
-  const [fetchError, setFetchError] = useState<any>(null);
   const [googleOpeningHours, setGoogleOpeningHours] = useState<string[] | null>(null);
   const [googleOpeningHoursLoading, setGoogleOpeningHoursLoading] = useState(false);
   const [goodForWorkingOnly, setGoodForWorkingOnly] = useState(false);
@@ -29,14 +28,12 @@ export default function Home() {
   const [user, setUser] = useState<any>(null)
   const [showAuth, setShowAuth] = useState(false)
   const [showBookmarks, setShowBookmarks] = useState(false)
-  const [authLoading, setAuthLoading] = useState(true)
   const [bookmarksChanged, setBookmarksChanged] = useState(0);
   const [priceFilters, setPriceFilters] = useState<number[]>([]);
   const [locationHover, setLocationHover] = useState(false);
   const [bookmarksHover, setBookmarksHover] = useState(false);
   const [cafePhoto, setCafePhoto] = React.useState<string | null>(null);
   const [cafePhotoLoading, setCafePhotoLoading] = React.useState(false);
-  const [cafePhotoError, setCafePhotoError] = React.useState<string | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -48,11 +45,9 @@ export default function Home() {
     fetchCafeNomadCafes()
       .then((data) => {
         setCafes(data);
-        setFetchError(null);
       })
       .catch((e) => {
-        setError(e.message);
-        setFetchError(e);
+        setError(e.message || "Unknown error");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -61,7 +56,6 @@ export default function Home() {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      setAuthLoading(false)
     })
 
     // Listen for auth changes
@@ -126,19 +120,17 @@ export default function Home() {
       // Use textSearch for better matching
       service.textSearch({
         query: `${cafe.name} ${cafe.address}`,
-      }, (results: any, status: any) => {
-        console.log('textSearch', { results, status });
+      }, (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-          const placeId = results[0].place_id;
+          const placeId = results[0].place_id ?? '';
           // Step 2: Get details
-          service.getDetails({
+          (service.getDetails as any)({
             placeId,
             fields: ['opening_hours'],
-          }, (place: any, status: any) => {
-            console.log('getDetails', { place, status });
+          }, (place: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
             setGoogleOpeningHoursLoading(false);
             if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.opening_hours) {
-              setGoogleOpeningHours(place.opening_hours.weekday_text);
+              setGoogleOpeningHours(place.opening_hours.weekday_text ?? []);
             } else {
               setGoogleOpeningHours([]); // Indicate that Google opening hours are not available
             }
@@ -199,13 +191,12 @@ export default function Home() {
   useEffect(() => {
     if (!selectedCafe) return;
     setCafePhoto(null);
-    setCafePhotoError(null);
     if (window.google && window.google.maps && window.google.maps.places) {
       setCafePhotoLoading(true);
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
       service.textSearch({
         query: `${selectedCafe.name} ${selectedCafe.address}`,
-      }, (results, status) => {
+      }, (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => {
         setCafePhotoLoading(false);
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
           if (results[0].photos && results[0].photos.length > 0) {
@@ -213,11 +204,11 @@ export default function Home() {
             setCafePhoto(photoUrl);
           }
         } else {
-          setCafePhotoError('No photo available');
+          setCafePhoto(null);
         }
       });
     } else {
-      setCafePhotoError('No photo available');
+      setCafePhoto(null);
     }
   }, [selectedCafe]);
 

@@ -9,7 +9,6 @@ import BookmarkButton from "../components/BookmarkButton";
 import BookmarksList from "../components/BookmarksList";
 import UserDropdown from "../components/UserDropdown";
 import { supabase } from "../utils/supabase";
-import type { User } from '@supabase/supabase-js';
 import type { Bookmark } from '../utils/supabase';
 
 type MinimalUser = { id: string; email: string; user_metadata?: { name?: string } };
@@ -84,7 +83,7 @@ export default function Home() {
         setError(null);
         setLoading(false);
       },
-      (err) => {
+      () => {
         setError("Unable to retrieve your location.");
         setLoading(false);
       }
@@ -109,7 +108,7 @@ export default function Home() {
       } else {
         setError("Location not found. Please try a different search term.");
       }
-    } catch (err) {
+    } catch {
       setError("Search failed. Please try again.");
     } finally {
       setSearchLoading(false);
@@ -618,8 +617,16 @@ export default function Home() {
       {showAuth && (
         <Auth
           onAuthChange={(user) => {
-            setUser(user ? { id: user.id, email: user.email ?? '', user_metadata: user.user_metadata } : null)
-            setShowAuth(false)
+            if (user && typeof user === 'object' && 'id' in user && 'email' in user) {
+              setUser({ 
+                id: user.id as string, 
+                email: (user.email as string) ?? '', 
+                user_metadata: 'user_metadata' in user ? (user.user_metadata as { name?: string }) : undefined
+              });
+            } else {
+              setUser(null);
+            }
+            setShowAuth(false);
           }}
           onClose={() => setShowAuth(false)}
         />

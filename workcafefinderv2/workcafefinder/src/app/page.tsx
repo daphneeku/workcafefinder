@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useCallback } from "react";
+import Image from 'next/image';
 import Map from "../components/Map";
 import CafeList from "../components/CafeList";
 import { fetchCafeNomadCafes, CafeNomadCafe } from "../utils/cafenomad";
@@ -541,7 +542,14 @@ export default function Home() {
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading photo...</div>
             ) : cafePhoto ? (
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
-                <img src={cafePhoto} alt={`Photo of ${selectedCafe.name}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image 
+                  src={cafePhoto} 
+                  alt={`Photo of ${selectedCafe.name}`}
+                  width={600}
+                  height={260}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  unoptimized={true}
+                />
               </div>
             ) : null}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>

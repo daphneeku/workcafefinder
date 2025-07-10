@@ -115,7 +115,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
           borderRadius: '8px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           minWidth: '200px',
-          zIndex: 1000,
+          zIndex: 1002,
           marginTop: '4px'
         }}>
           {/* User Info */}

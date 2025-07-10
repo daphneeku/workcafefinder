@@ -9,10 +9,13 @@ export const supabase = supabaseUrl && supabaseAnonKey
   : null
 
 export type Bookmark = {
+  id: number; // bigint in your table
+  user_id: string;
   cafe_id: string;
-  cafe_name: string;
-  cafe_address: string;
-  id: string;
+  cafe_name?: string;
+  cafe_address?: string;
+  created_at?: string;
+  // Additional fields that might be used in the app
   latitude?: number;
   longitude?: number;
   wifi?: number;

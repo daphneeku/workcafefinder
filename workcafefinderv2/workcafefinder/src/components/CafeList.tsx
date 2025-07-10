@@ -1,6 +1,7 @@
 import React from "react";
 import type { CafeNomadCafe } from "../utils/cafenomad";
 import BookmarkButton from "./BookmarkButton";
+import Image from 'next/image';
 
 interface CafeListProps {
   cafes: CafeNomadCafe[];
@@ -101,6 +102,7 @@ export const CafeCardPreview: React.FC<{
         boxShadow: selected ? '0 2px 8px rgba(56, 142, 196, 0.10)' : 'none',
         display: 'block',
         textAlign: compact ? 'center' : 'left',
+        position: 'relative',
       }}
       onClick={onClick}
     >
@@ -116,16 +118,14 @@ export const CafeCardPreview: React.FC<{
           justifyContent: compact ? 'flex-end' : 'flex-start',
           alignItems: compact ? 'center' : 'flex-start',
         }}>
-          <img 
+          <Image 
             src={photo} 
             alt={`Photo of ${cafe.name}`}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
+            width={200}
+            height={150}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => {
-              e.currentTarget.style.display = 'none';
+              (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
         </div>
@@ -158,12 +158,20 @@ const CafeListItem: React.FC<{
     <li style={{ listStyle: 'none', position: 'relative' }}>
       <CafeCardPreview cafe={cafe} selected={selected} onClick={onClick} showAddress={true} />
       {userId && (
-        <div style={{
-          position: 'absolute',
-          top: '8px',
-          right: '8px',
-          zIndex: 10
-        }}>
+        <div 
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            zIndex: 1000,
+            pointerEvents: 'auto'
+          }}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            e.nativeEvent.stopImmediatePropagation()
+          }}
+        >
           <BookmarkButton 
             cafe={cafe} 
             userId={userId} 

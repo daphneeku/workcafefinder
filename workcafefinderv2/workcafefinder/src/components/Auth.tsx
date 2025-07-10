@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { supabase } from '../utils/supabase'
+import Image from 'next/image';
 
 interface AuthProps {
   onAuthChange: (user: unknown) => void
@@ -265,7 +266,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
               onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
             >
-              <img src="/google.png" alt="Google sign in" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+              <Image src="/google.png" alt="Google sign in" width={32} height={32} style={{ objectFit: 'contain' }} />
             </button>
             <button
               type="button"
@@ -289,7 +290,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange, onClose }) => {
               onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
             >
-              <img src="/facebook.png" alt="Facebook sign in" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+              <Image src="/facebook.png" alt="Facebook sign in" width={32} height={32} style={{ objectFit: 'contain' }} />
             </button>
             </div>
           </div>

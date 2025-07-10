@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import type { CafeNomadCafe } from '../utils/cafenomad';
+import type { Bookmark } from '../utils/supabase';
 import BookmarkButton from './BookmarkButton';
+import Image from 'next/image';
 
 interface BookmarksListProps {
   userId: string;
@@ -10,34 +12,6 @@ interface BookmarksListProps {
   bookmarksChanged: number;
   onBookmarksChanged?: () => void;
 }
-
-type Bookmark = {
-  cafe_id: string;
-  cafe_name: string;
-  cafe_address: string;
-  id: string;
-  latitude?: number;
-  longitude?: number;
-  wifi?: number;
-  quiet?: number;
-  seat?: number;
-  socket?: number;
-  cheap?: number;
-  open_time?: string;
-  music?: number;
-  limited_time?: string;
-  standing_desk?: string;
-  mrt?: string;
-  url?: string;
-  city?: string;
-  district?: string;
-  price?: string;
-  tasty?: number;
-  comfort?: number;
-  drinks?: string;
-  food?: string;
-  last_update?: string;
-};
 
 // Reuse CafeListItem logic for bookmarks
 const CafeListItem: React.FC<{
@@ -137,23 +111,21 @@ const CafeListItem: React.FC<{
           background: '#f0f0f0',
           marginBottom: '0.75rem',
         }}>
-          <img
+          <Image
             src={photo}
             alt={`Photo of ${cafe.cafe_name}`}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
+            width={200}
+            height={120}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => {
-              e.currentTarget.style.display = 'none';
+              (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
         </div>
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <strong>{cafe.cafe_name}</strong>
-        <div>{cafe.cafe_address}</div>
+        <strong>{cafe.cafe_name || 'Unknown Cafe'}</strong>
+        <div>{cafe.cafe_address || 'No address available'}</div>
         <div>
           {loading ? 'Loading...' : rating !== null ? (
             <>
@@ -172,8 +144,8 @@ const CafeListItem: React.FC<{
         <BookmarkButton 
           cafe={{
             id: cafe.cafe_id || '',
-            name: cafe.cafe_name,
-            address: cafe.cafe_address,
+            name: cafe.cafe_name || '',
+            address: cafe.cafe_address || '',
             latitude: cafe.latitude || 0,
             longitude: cafe.longitude || 0,
             wifi: cafe.wifi || 0,
@@ -317,8 +289,8 @@ const BookmarksList: React.FC<BookmarksListProps> = ({ userId, onCafeClick, onCl
                   // Convert bookmarked cafe data to proper format for details modal
                   const cafeData: CafeNomadCafe = {
                     id: bm.cafe_id || '',
-                    name: bm.cafe_name,
-                    address: bm.cafe_address,
+                    name: bm.cafe_name || '',
+                    address: bm.cafe_address || '',
                     latitude: bm.latitude || 0,
                     longitude: bm.longitude || 0,
                     wifi: bm.wifi || 0,

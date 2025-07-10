@@ -10,6 +10,7 @@ import BookmarksList from "../components/BookmarksList";
 import UserDropdown from "../components/UserDropdown";
 import { supabase } from "../utils/supabase";
 import type { Bookmark } from '../utils/supabase';
+import Image from 'next/image';
 
 type MinimalUser = { id: string; email: string; user_metadata?: { name?: string } };
 
@@ -37,6 +38,9 @@ export default function Home() {
   const [bookmarksHover, setBookmarksHover] = useState(false);
   const [cafePhoto, setCafePhoto] = React.useState<string | null>(null);
   const [cafePhotoLoading, setCafePhotoLoading] = React.useState(false);
+
+  // Add debug info for Supabase configuration
+  const isSupabaseConfigured = !!supabase;
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -122,32 +126,31 @@ export default function Home() {
     let normalizedCafe: CafeNomadCafe;
     if ('cafe_id' in cafe) {
       // Convert Bookmark to CafeNomadCafe
-      const { latitude, longitude, wifi, quiet, seat, socket, cheap, open_time, music, limited_time, standing_desk, mrt, url, city, district, price, tasty, comfort, drinks, food, last_update } = cafe as Partial<CafeNomadCafe>;
       normalizedCafe = {
         id: cafe.cafe_id,
-        name: cafe.cafe_name,
-        address: cafe.cafe_address,
-        latitude: latitude ?? 0,
-        longitude: longitude ?? 0,
-        wifi: wifi ?? 0,
-        quiet: quiet ?? 0,
-        seat: seat ?? 0,
-        socket: socket ?? 0,
-        cheap: cheap ?? 0,
-        open_time: open_time ?? '',
-        music: music ?? 0,
-        limited_time: limited_time ?? 'no',
-        standing_desk: standing_desk ?? 'no',
-        mrt: mrt ?? '',
-        url: url ?? '',
-        city: city ?? '',
-        district: district ?? '',
-        price: price ?? '',
-        tasty: tasty ?? 0,
-        comfort: comfort ?? 0,
-        drinks: drinks ?? '',
-        food: food ?? '',
-        last_update: last_update ?? ''
+        name: cafe.cafe_name || '',
+        address: cafe.cafe_address || '',
+        latitude: cafe.latitude ?? 0,
+        longitude: cafe.longitude ?? 0,
+        wifi: cafe.wifi ?? 0,
+        quiet: cafe.quiet ?? 0,
+        seat: cafe.seat ?? 0,
+        socket: cafe.socket ?? 0,
+        cheap: cafe.cheap ?? 0,
+        open_time: cafe.open_time ?? '',
+        music: cafe.music ?? 0,
+        limited_time: cafe.limited_time ?? 'no',
+        standing_desk: cafe.standing_desk ?? 'no',
+        mrt: cafe.mrt ?? '',
+        url: cafe.url ?? '',
+        city: cafe.city ?? '',
+        district: cafe.district ?? '',
+        price: cafe.price ?? '',
+        tasty: cafe.tasty ?? 0,
+        comfort: cafe.comfort ?? 0,
+        drinks: cafe.drinks ?? '',
+        food: cafe.food ?? '',
+        last_update: cafe.last_update ?? ''
       };
     } else {
       normalizedCafe = cafe;
@@ -263,6 +266,18 @@ export default function Home() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h1 style={{ color: '#000' }}>WorkCafeFinder Taiwan 🍵</h1>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            {!isSupabaseConfigured && (
+              <div style={{ 
+                background: '#ffebee', 
+                color: '#c62828', 
+                padding: '8px 12px', 
+                borderRadius: '6px', 
+                fontSize: '14px',
+                border: '1px solid #ffcdd2'
+              }}>
+                ⚠️ Supabase not configured. Bookmarks won&apos;t work.
+              </div>
+            )}
             {user ? (
               <UserDropdown user={user} onLogout={handleLogout} />
             ) : (
@@ -373,9 +388,14 @@ export default function Home() {
               fontSize: "0.9rem",
               fontWeight: "600",
               cursor: "pointer",
-              transition: "background 0.2s"
+              transition: "background 0.2s",
+              opacity: isSupabaseConfigured ? 1 : 0.5
             }}
             onClick={() => {
+              if (!isSupabaseConfigured) {
+                alert("Please configure Supabase first. Check the SUPABASE_SETUP.md file for instructions.");
+                return;
+              }
               if (user) {
                 setShowBookmarks(true);
               } else {
@@ -385,6 +405,7 @@ export default function Home() {
             }}
             onMouseEnter={() => setBookmarksHover(true)}
             onMouseLeave={() => setBookmarksHover(false)}
+            title={!isSupabaseConfigured ? "Supabase not configured" : "View your bookmarked cafes"}
           >
             Bookmarks ☕
           </button>
@@ -521,7 +542,13 @@ export default function Home() {
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading photo...</div>
             ) : cafePhoto ? (
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
-                <img src={cafePhoto} alt={`Photo of ${selectedCafe.name}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image 
+                  src={cafePhoto} 
+                  alt={`Photo of ${selectedCafe.name}`}
+                  width={400}
+                  height={260}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
             ) : null}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>

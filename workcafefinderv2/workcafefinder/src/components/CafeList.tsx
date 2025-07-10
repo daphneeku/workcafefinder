@@ -94,29 +94,29 @@ export const CafeCardPreview: React.FC<{
         cursor: onClick ? "pointer" : undefined,
         color: '#3d3d3d',
         borderRadius: '12px',
-        minWidth: compact ? '280px' : '320px',
-        maxWidth: '100%',
+        width: compact ? '280px' : '320px',
+        height: compact ? '280px' : '320px',
         boxSizing: 'border-box',
         transition: 'box-shadow 0.2s',
         lineHeight: '1.7',
         boxShadow: selected ? '0 2px 8px rgba(56, 142, 196, 0.10)' : 'none',
-        display: 'block',
+        display: 'flex',
+        flexDirection: 'column',
         textAlign: compact ? 'center' : 'left',
         position: 'relative',
+        overflow: 'hidden'
       }}
       onClick={onClick}
     >
-      {photo && (
+      {photo ? (
         <div style={{
           width: '100%',
-          height: compact ? '150px' : '170px',
+          height: compact ? '120px' : '170px',
           borderRadius: '8px',
           overflow: 'hidden',
           background: '#f0f0f0',
           marginBottom: compact ? '0.5rem' : '0.75rem',
-          display: compact ? 'flex' : 'block',
-          justifyContent: compact ? 'flex-end' : 'flex-start',
-          alignItems: compact ? 'center' : 'flex-start',
+          flexShrink: 0
         }}>
           <Image 
             src={photo} 
@@ -129,11 +129,48 @@ export const CafeCardPreview: React.FC<{
             }}
           />
         </div>
+      ) : (
+        <div style={{
+          width: '100%',
+          height: compact ? '120px' : '170px',
+          borderRadius: '8px',
+          background: '#f0f0f0',
+          marginBottom: compact ? '0.5rem' : '0.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#999',
+          fontSize: '14px',
+          flexShrink: 0
+        }}>
+          No Photo
+        </div>
       )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <strong style={{ fontSize: compact ? '16px' : '18px', fontWeight: '600' }}>{cafe.name}</strong>
-        {showAddress && <div>{cafe.address}</div>}
+      <div style={{ 
+        flex: 1, 
+        minWidth: 0, 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }}>
         <div>
+          <strong style={{ 
+            fontSize: compact ? '16px' : '18px', 
+            fontWeight: '600',
+            display: 'block',
+            marginBottom: '4px',
+            lineHeight: '1.3'
+          }}>{cafe.name}</strong>
+          {showAddress && (
+            <div style={{ 
+              fontSize: '14px', 
+              color: '#666',
+              marginBottom: '8px',
+              lineHeight: '1.4'
+            }}>{cafe.address}</div>
+          )}
+        </div>
+        <div style={{ marginTop: 'auto' }}>
           {loading ? 'Loading...' : rating !== null ? (
             <>
               {renderStars(rating)} <span style={{ fontSize: 13, color: '#888', marginLeft: 4 }}>{rating.toFixed(1)}</span>

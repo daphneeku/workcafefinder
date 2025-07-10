@@ -10,7 +10,6 @@ import BookmarksList from "../components/BookmarksList";
 import UserDropdown from "../components/UserDropdown";
 import { supabase } from "../utils/supabase";
 import type { Bookmark } from '../utils/supabase';
-import Image from 'next/image';
 
 type MinimalUser = { id: string; email: string; user_metadata?: { name?: string } };
 
@@ -412,7 +411,7 @@ export default function Home() {
         </form>
       </header>
       <main style={{ display: "flex", flex: 1, minHeight: 0, height: '82vh', gap: '1rem' }}>
-        <aside style={{ width: '20%', height: '84.7vh', overflowY: 'auto', padding: "1rem 1rem 1rem 2rem", background: '#f7f7f7', color: '#222', borderTopRightRadius: '18px' }}>
+        <aside style={{ width: '20%', height: '100vh', overflowY: 'auto', padding: "1rem 1rem 1rem 2rem", background: '#f7f7f7', color: '#222', borderTopRightRadius: '18px' }}>
           <h2 style={{ padding: "0.5rem 0 0.1rem 0.1rem", margin: "0 0 1.8rem 0" }}>Filters</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", fontWeight: 500 }}>
             <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.75rem', paddingLeft: '0.1rem' }}>
@@ -498,7 +497,7 @@ export default function Home() {
             <Map location={location} cafes={filteredCafes} isLoaded={isLoaded} loadError={loadError} onCafePinClick={handleCafeClick} />
           </div>
         </section>
-        <aside style={{ width: '25%', height: '84.7vh', overflowY: 'auto', padding: "1rem", background: '#f7f7f7', color: '#222', borderTopLeftRadius: '18px' }}>
+        <aside style={{ width: '25%', height: '100vh', overflowY: 'auto', padding: "1rem", background: '#f7f7f7', color: '#222', borderTopLeftRadius: '18px' }}>
           <h2 style={{ padding: "0.5rem 0 0.1rem 0.5frem", margin: "0 0 1.3rem 0" }}>Cafes</h2>
           {loading && <div>Loading cafes...</div>}
           {error && <div style={{ color: "red" }}>{error}</div>}
@@ -542,13 +541,7 @@ export default function Home() {
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading photo...</div>
             ) : cafePhoto ? (
               <div style={{ width: '100%', height: 260, background: '#f0f0f0', borderRadius: 10, marginBottom: 12, overflow: 'hidden' }}>
-                <Image 
-                  src={cafePhoto} 
-                  alt={`Photo of ${selectedCafe.name}`}
-                  width={400}
-                  height={260}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                <img src={cafePhoto} alt={`Photo of ${selectedCafe.name}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             ) : null}
             <h2 style={{ margin: 0, fontWeight: 700, fontSize: 22, display: 'flex', alignItems: 'center', gap: 8 }}>

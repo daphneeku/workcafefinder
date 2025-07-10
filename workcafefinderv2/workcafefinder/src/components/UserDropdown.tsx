@@ -34,18 +34,25 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
 
   // Update UserDropdown component to handle null supabase client
   const handleUpdateName = async () => {
-    if (!supabase) {
-      alert('Authentication service not available');
-      return;
-    }
-    
     if (!newName.trim()) {
       alert('Please enter a name');
       return;
     }
 
+    if (!supabase) {
+      alert('Authentication service not available');
+      return;
+    }
+
     setIsUpdating(true);
     try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        alert('Auth session missing!');
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         data: { name: newName.trim() }
       });
@@ -55,14 +62,18 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
       } else {
         alert('Name updated successfully!');
         setIsEditing(false);
-        setNewName('');
-        // Refresh user data
-        if (onLogout) {
-          onLogout();
+
+        // ✅ Refresh user metadata without signing out
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error('Failed to refresh user:', userError.message);
+        } else {
+          setNewName(userData.user?.user_metadata?.name || '');
         }
       }
-    } catch {
+    } catch (err) {
       alert('An unexpected error occurred');
+      console.error(err);
     } finally {
       setIsUpdating(false);
     }

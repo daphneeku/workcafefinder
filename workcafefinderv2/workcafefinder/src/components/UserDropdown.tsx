@@ -17,7 +17,6 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(user?.user_metadata?.name || '');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,45 +68,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!supabase) {
-      alert('Authentication service not available');
-      return;
-    }
-    
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your bookmarks.')) {
-      return;
-    }
 
-    setIsDeleting(true);
-    try {
-      // First delete all bookmarks
-      const { error: bookmarksError } = await supabase
-        .from('bookmarks')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (bookmarksError) {
-        console.error('Error deleting bookmarks:', bookmarksError);
-      }
-
-      // Then delete the user account
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-      
-      if (error) {
-        alert('Failed to delete account: ' + error.message);
-      } else {
-        alert('Account deleted successfully');
-        if (onLogout) {
-          onLogout();
-        }
-      }
-    } catch {
-      alert('An unexpected error occurred while deleting your account');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }}>
@@ -262,26 +223,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
             🚪 Sign Out
           </button>
 
-          {/* Delete Account */}
-          <button
-            onClick={handleDeleteAccount}
-            disabled={isDeleting}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: isDeleting ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              textAlign: 'left',
-              color: isDeleting ? '#999' : '#dc3545',
-              transition: 'background 0.2s'
-            }}
-            onMouseEnter={(e) => !isDeleting && (e.currentTarget.style.background = '#fff5f5')}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-          >
-            {isDeleting ? '🗑️ Deleting...' : '🗑️ Delete Account'}
-          </button>
+
         </div>
       )}
     </div>
